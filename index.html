@@ -6,7 +6,26 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
+<div class="game-ui">
+  <div class="team-panel blue">
+    <div class="team-title">BLUE TEAM</div>
+    <div class="team-stats">🛡️ <span id="blueCount" class="team-count">20</span></div>
+  </div>
+  <div class="vs-indicator">VS</div>
+  <div class="team-panel red">
+    <div class="team-title">RED TEAM</div>
+    <div class="team-stats">⚔️ <span id="redCount" class="team-count">20</span></div>
+  </div>
+</div>
+<div class="controls-panel">
+  <span>🏃</span> Auto-move to nearest enemy
+  <span>💥</span> Collision = 1 damage
+  <span>❤️</span> 3 health per unit
+</div>
+<div class="victory-overlay" id="victoryOverlay">
+  <div class="victory-text" id="victoryText">BLUE TEAM VICTORY!</div>
+  <button class="restart-btn" id="restartBtn">⚔️ RESTART BATTLE ⚔️</button>
+</div>
   <script type="module" src="/main.js"></script>
 
 </body>
