@@ -1,6 +1,6 @@
 import Phaser from "phaser";
+import Unit from "./unit.js";
 import { resolveCollisions } from "./CollisionSystem.js";
-import Unit from "./Unit.js";
 
 // ---------- Helper: find nearest enemy ----------
 function findNearestEnemy(unit, allUnits) {
@@ -45,7 +45,7 @@ const config = {
   type: Phaser.AUTO,
   width: window.innerWidth,
   height: window.innerHeight,
-  backgroundColor: "#111",
+  backgroundColor: "#0a0a1a",
   scene: {
     create,
     update,
@@ -53,29 +53,50 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
-let units = [];        // array of Unit objects
-let sceneRef = null;   // to access width/height in update
+let units = [];
+let sceneRef = null;
+let playerControl = true; // set to false for AI vs AI
 
 function create() {
   sceneRef = this;
   const w = this.game.config.width;
   const h = this.game.config.height;
 
-  // ----- BLUE TEAM (left side) -----
-  for (let i = 0; i < 20; i++) {
-    const x = Phaser.Math.Between(50, w / 2 - 50);
-    const y = Phaser.Math.Between(50, h - 50);
-    const unit = new Unit(this, x, y, "blue", 1.2, 3, 0x00aaff);
+  // ----- BLUE TEAM (BOTTOM - PLAYER/ALLY) -----
+  for (let i = 0; i < 15; i++) {
+    const x = Phaser.Math.Between(40, w - 40);
+    const y = Phaser.Math.Between(h - 100, h - 50);
+    const unit = new Unit(this, x, y, "blue", 1.3, 3, 0x00aaff);
     units.push(unit);
   }
 
-  // ----- RED TEAM (right side) -----
+  // ----- RED TEAM (TOP - ENEMY/CPU) -----
   for (let i = 0; i < 20; i++) {
-    const x = Phaser.Math.Between(w / 2 + 50, w - 50);
-    const y = Phaser.Math.Between(50, h - 50);
+    const x = Phaser.Math.Between(40, w - 40);
+    const y = Phaser.Math.Between(50, 150);
     const unit = new Unit(this, x, y, "red", 1.0, 3, 0xff3355);
     units.push(unit);
   }
+
+  // Optional: add a visual divider line
+  const graphics = this.add.graphics();
+  graphics.lineStyle(2, 0xffffff, 0.3);
+  graphics.lineBetween(0, h / 2, w, h / 2);
+  
+  // Add "territory" labels
+  this.add.text(w / 2, 60, "🔴 ENEMY TERRITORY 🔴", {
+    fontSize: "14px",
+    fill: "#ff3355",
+    fontFamily: "Orbitron, monospace",
+    align: "center"
+  }).setOrigin(0.5).setAlpha(0.7);
+  
+  this.add.text(w / 2, h - 60, "🔵 YOUR TERRITORY 🔵", {
+    fontSize: "14px",
+    fill: "#00aaff",
+    fontFamily: "Orbitron, monospace",
+    align: "center"
+  }).setOrigin(0.5).setAlpha(0.7);
 }
 
 function update() {
@@ -104,20 +125,74 @@ function update() {
   // 4. update cooldowns, health text positions, and remove dead units
   const remainingUnits = [];
   for (let unit of units) {
-    if (!unit.alive) {
-      // already destroyed by Unit.destroy()
-      continue;
-    }
+    if (!unit.alive) continue;
     unit.tickCooldown();
     unit.updateTextPosition();
     remainingUnits.push(unit);
   }
   units = remainingUnits;
 
-  // optional: small win condition (stop when only one team left)
-  const blueAlive = units.some(u => u.alive && u.team === "blue");
-  const redAlive = units.some(u => u.alive && u.team === "red");
-  if (!blueAlive || !redAlive) {
-    // you can show text here if you like
+  // 5. Update UI counts
+  const blueAlive = units.filter(u => u.alive && u.team === "blue").length;
+  const redAlive = units.filter(u => u.alive && u.team === "red").length;
+  
+  const blueCountElem = document.getElementById("blueCount");
+  const redCountElem = document.getElementById("redCount");
+  if (blueCountElem) blueCountElem.innerText = blueAlive;
+  if (redCountElem) redCountElem.innerText = redAlive;
+
+  // 6. Check victory condition
+  if (blueAlive === 0 || redAlive === 0) {
+    const winner = blueAlive === 0 ? "RED" : "BLUE";
+    const victoryOverlay = document.getElementById("victoryOverlay");
+    const victoryText = document.getElementById("victoryText");
+    if (victoryOverlay && victoryText && !victoryOverlay.classList.contains("show")) {
+      victoryText.innerText = `${winner} TEAM VICTORY!`;
+      victoryOverlay.classList.add("show");
+    }
   }
 }
+
+// Optional: restart function (expose globally)
+window.restartGame = () => {
+  // Clean up existing units
+  for (let unit of units) {
+    if (unit.sprite) unit.sprite.destroy();
+    if (unit.healthText) unit.healthText.destroy();
+  }
+  units = [];
+  
+  // Re-create the scene
+  const w = sceneRef.game.config.width;
+  const h = sceneRef.game.config.height;
+  
+  // Blue at bottom
+  for (let i = 0; i < 15; i++) {
+    const x = Phaser.Math.Between(40, w - 40);
+    const y = Phaser.Math.Between(h - 100, h - 50);
+    const unit = new Unit(sceneRef, x, y, "blue", 1.3, 3, 0x00aaff);
+    units.push(unit);
+  }
+  
+  // Red at top
+  for (let i = 0; i < 20; i++) {
+    const x = Phaser.Math.Between(40, w - 40);
+    const y = Phaser.Math.Between(50, 150);
+    const unit = new Unit(sceneRef, x, y, "red", 1.0, 3, 0xff3355);
+    units.push(unit);
+  }
+  
+  // Hide victory overlay
+  const victoryOverlay = document.getElementById("victoryOverlay");
+  if (victoryOverlay) victoryOverlay.classList.remove("show");
+};
+
+// Add restart button listener when DOM loads
+document.addEventListener("DOMContentLoaded", () => {
+  const restartBtn = document.getElementById("restartBtn");
+  if (restartBtn) {
+    restartBtn.addEventListener("click", () => {
+      window.restartGame();
+    });
+  }
+});

@@ -2,31 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Swarm Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>AI Swarm Arena - Vertical Battle</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="game-ui">
-  <div class="team-panel blue">
-    <div class="team-title">BLUE TEAM</div>
-    <div class="team-stats">🛡️ <span id="blueCount" class="team-count">20</span></div>
+  <div class="game-ui">
+    <div class="team-panel blue">
+      <div class="team-title">🔵 YOUR TEAM (BOTTOM)</div>
+      <div class="team-stats">🛡️ <span id="blueCount" class="team-count">15</span></div>
+    </div>
+    <div class="vs-indicator">⬇️ VS ⬆️</div>
+    <div class="team-panel red">
+      <div class="team-title">🔴 ENEMY TEAM (TOP)</div>
+      <div class="team-stats">⚔️ <span id="redCount" class="team-count">20</span></div>
+    </div>
   </div>
-  <div class="vs-indicator">VS</div>
-  <div class="team-panel red">
-    <div class="team-title">RED TEAM</div>
-    <div class="team-stats">⚔️ <span id="redCount" class="team-count">20</span></div>
+  
+  <div class="controls-panel">
+    <span>🏃</span> Auto-attack upward
+    <span>💥</span> Collision = 1 damage
+    <span>❤️</span> 3 health per unit
+    <span>🎯</span> Blue moves faster
   </div>
-</div>
-<div class="controls-panel">
-  <span>🏃</span> Auto-move to nearest enemy
-  <span>💥</span> Collision = 1 damage
-  <span>❤️</span> 3 health per unit
-</div>
-<div class="victory-overlay" id="victoryOverlay">
-  <div class="victory-text" id="victoryText">BLUE TEAM VICTORY!</div>
-  <button class="restart-btn" id="restartBtn">⚔️ RESTART BATTLE ⚔️</button>
-</div>
+  
+  <div class="victory-overlay" id="victoryOverlay">
+    <div class="victory-text" id="victoryText">BLUE TEAM VICTORY!</div>
+    <button class="restart-btn" id="restartBtn">⚔️ RESTART BATTLE ⚔️</button>
+  </div>
+  
   <script type="module" src="/main.js"></script>
-
 </body>
 </html>
